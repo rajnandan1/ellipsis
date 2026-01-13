@@ -2,7 +2,7 @@
 
 <video src="https://github.com/user-attachments/assets/cdfe026b-db3c-47d7-875f-a0aa3a1933a4" autoplay loop muted playsinline width="100%"></video>
 
-A TypeScript library for DOM to Snapshot conversion - compress HTML documents for efficient processing by LLMs.
+Ellipsis is typescript library for DOM to Snapshot conversion - compress HTML documents for efficient processing by LLMs.
 
 Based on the [Beyond Pixels: Exploring DOM Downsampling for LLM-Based Web Agents](https://arxiv.org/abs/2508.04412).
 
