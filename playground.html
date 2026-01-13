@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ellipsis - DOM Compression Playground</title>
+        <link rel="icon" type="image/png" href="favicon.ico" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
+            .editor-container {
+                height: calc(100vh - 250px);
+                min-height: 400px;
+            }
+            textarea {
+                font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+                font-size: 13px;
+                resize: none;
+            }
+            .stats-badge {
+                font-size: 0.85rem;
+            }
+            .form-range {
+                cursor: pointer;
+            }
+            .header-brand {
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }
+            .param-value {
+                min-width: 45px;
+                text-align: center;
+            }
+            #output {
+                background-color: #f1f3f5;
+            }
+            .loading {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand header-brand">
+                    <img
+                        src="ellipsis-logo.png"
+                        alt="Ellipsis Logo"
+                        width="30"
+                        height="30"
+                        class="d-inline-block align-text-top me-2"
+                    />
+                    Ellipsis Playground
+                </span>
+                <span class="text-light small opacity-75"
+                    >DOM Compression Library</span
+                >
+            </div>
+        </nav>
+
+        <div class="container-fluid px-4">
+            <!-- Controls -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body py-3">
+                            <div class="row align-items-center g-3">
+                                <!-- Method Selection -->
+                                <div class="col-auto">
+                                    <label
+                                        class="form-label mb-0 me-2 fw-semibold"
+                                        >Method:</label
+                                    >
+                                </div>
+                                <div class="col-auto">
+                                    <div class="btn-group" role="group">
+                                        <input
+                                            type="radio"
+                                            class="btn-check"
+                                            name="method"
+                                            id="methodNonAdaptive"
+                                            value="non-adaptive"
+                                            checked
+                                        />
+                                        <label
+                                            class="btn btn-outline-primary"
+                                            for="methodNonAdaptive"
+                                            >Non-Adaptive</label
+                                        >
+
+                                        <input
+                                            type="radio"
+                                            class="btn-check"
+                                            name="method"
+                                            id="methodAdaptive"
+                                            value="adaptive"
+                                        />
+                                        <label
+                                            class="btn btn-outline-primary"
+                                            for="methodAdaptive"
+                                            >Adaptive</label
+                                        >
+                                    </div>
+                                </div>
+
+                                <!-- Non-Adaptive Parameters -->
+                                <div class="col-auto" id="nonAdaptiveParams">
+                                    <div
+                                        class="d-flex align-items-center gap-4"
+                                    >
+                                        <div
+                                            class="d-flex align-items-center gap-2"
+                                        >
+                                            <label
+                                                class="form-label mb-0 small text-muted"
+                                                >k (merge):</label
+                                            >
+                                            <input
+                                                type="range"
+                                                class="form-range"
+                                                id="paramK"
+                                                min="0"
+                                                max="1"
+                                                step="0.1"
+                                                value="0.5"
+                                                style="width: 100px"
+                                            />
+                                            <span
+                                                class="badge bg-secondary param-value"
+                                                id="paramKValue"
+                                                >0.5</span
+                                            >
+                                        </div>
+                                        <div
+                                            class="d-flex align-items-center gap-2"
+                                        >
+                                            <label
+                                                class="form-label mb-0 small text-muted"
+                                                >l (text):</label
+                                            >
+                                            <input
+                                                type="range"
+                                                class="form-range"
+                                                id="paramL"
+                                                min="0"
+                                                max="1"
+                                                step="0.1"
+                                                value="0.3"
+                                                style="width: 100px"
+                                            />
+                                            <span
+                                                class="badge bg-secondary param-value"
+                                                id="paramLValue"
+                                                >0.3</span
+                                            >
+                                        </div>
+                                        <div
+                                            class="d-flex align-items-center gap-2"
+                                        >
+                                            <label
+                                                class="form-label mb-0 small text-muted"
+                                                >m (attr):</label
+                                            >
+                                            <input
+                                                type="range"
+                                                class="form-range"
+                                                id="paramM"
+                                                min="0"
+                                                max="1"
+                                                step="0.1"
+                                                value="0.5"
+                                                style="width: 100px"
+                                            />
+                                            <span
+                                                class="badge bg-secondary param-value"
+                                                id="paramMValue"
+                                                >0.5</span
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Adaptive Parameters -->
+                                <div
+                                    class="col-auto d-none"
+                                    id="adaptiveParams"
+                                >
+                                    <div
+                                        class="d-flex align-items-center gap-3"
+                                    >
+                                        <div
+                                            class="d-flex align-items-center gap-2"
+                                        >
+                                            <label
+                                                class="form-label mb-0 small text-muted"
+                                                >Max Tokens:</label
+                                            >
+                                            <select
+                                                class="form-select form-select-sm"
+                                                id="maxTokens"
+                                                style="width: 120px"
+                                            >
+                                                <option value="1024">
+                                                    1,024
+                                                </option>
+                                                <option value="2048">
+                                                    2,048
+                                                </option>
+                                                <option value="4096" selected>
+                                                    4,096
+                                                </option>
+                                                <option value="8192">
+                                                    8,192
+                                                </option>
+                                                <option value="16384">
+                                                    16,384
+                                                </option>
+                                                <option value="32768">
+                                                    32,768
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div
+                                            class="d-flex align-items-center gap-2"
+                                        >
+                                            <label
+                                                class="form-label mb-0 small text-muted"
+                                                >Max Iterations:</label
+                                            >
+                                            <select
+                                                class="form-select form-select-sm"
+                                                id="maxIterations"
+                                                style="width: 80px"
+                                            >
+                                                <option value="3">3</option>
+                                                <option value="5" selected>
+                                                    5
+                                                </option>
+                                                <option value="10">10</option>
+                                                <option value="15">15</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Options -->
+                                <div class="col-auto ms-auto">
+                                    <div
+                                        class="d-flex align-items-center gap-3"
+                                    >
+                                        <div
+                                            class="form-check form-switch mb-0"
+                                        >
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="optDebug"
+                                                checked
+                                            />
+                                            <label
+                                                class="form-check-label small"
+                                                for="optDebug"
+                                                >Format Output</label
+                                            >
+                                        </div>
+                                        <div
+                                            class="form-check form-switch mb-0"
+                                        >
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="optUniqueIDs"
+                                            />
+                                            <label
+                                                class="form-check-label small"
+                                                for="optUniqueIDs"
+                                                >Assign UIDs</label
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Compress Button -->
+                                <div class="col-auto">
+                                    <button
+                                        class="btn btn-success px-4"
+                                        id="compressBtn"
+                                    >
+                                        <span
+                                            class="spinner-border spinner-border-sm d-none me-1"
+                                            id="spinner"
+                                        ></span>
+                                        Compress
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editors -->
+            <div class="row g-3 editor-container">
+                <!-- Input -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div
+                            class="card-header d-flex justify-content-between align-items-center py-2"
+                        >
+                            <span class="fw-semibold">Input HTML</span>
+                            <span
+                                class="badge bg-info stats-badge"
+                                id="inputStats"
+                                >0 chars</span
+                            >
+                        </div>
+                        <div class="card-body p-0">
+                            <textarea
+                                class="form-control h-100 border-0 rounded-0"
+                                id="input"
+                                placeholder="Paste your HTML here..."
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div
+                            class="card-header d-flex justify-content-between align-items-center py-2"
+                        >
+                            <span class="fw-semibold">Compressed Output</span>
+                            <div class="d-flex gap-2">
+                                <span
+                                    class="badge bg-success stats-badge"
+                                    id="outputStats"
+                                    >0 chars</span
+                                >
+                                <span
+                                    class="badge bg-warning text-dark stats-badge"
+                                    id="compressionRatio"
+                                    >0% reduction</span
+                                >
+                                <span
+                                    class="badge bg-primary stats-badge"
+                                    id="tokenEstimate"
+                                    >~0 tokens</span
+                                >
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <textarea
+                                class="form-control h-100 border-0 rounded-0"
+                                id="output"
+                                readonly
+                                placeholder="Compressed HTML will appear here..."
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adaptive Results -->
+            <div class="row mt-3 d-none" id="adaptiveResults">
+                <div class="col-12">
+                    <div class="alert alert-info mb-0 py-2">
+                        <strong>Adaptive Parameters Found:</strong>
+                        <span id="foundParams"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error -->
+            <div class="row mt-3 d-none" id="errorRow">
+                <div class="col-12">
+                    <div
+                        class="alert alert-danger mb-0 py-2"
+                        id="errorMessage"
+                    ></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="./dist/index.global.js"></script>
+        <script>
+            // Elements
+            const inputEl = document.getElementById("input");
+            const outputEl = document.getElementById("output");
+            const compressBtn = document.getElementById("compressBtn");
+            const spinner = document.getElementById("spinner");
+
+            const methodRadios = document.querySelectorAll(
+                'input[name="method"]'
+            );
+            const nonAdaptiveParams =
+                document.getElementById("nonAdaptiveParams");
+            const adaptiveParams = document.getElementById("adaptiveParams");
+
+            const paramK = document.getElementById("paramK");
+            const paramL = document.getElementById("paramL");
+            const paramM = document.getElementById("paramM");
+            const paramKValue = document.getElementById("paramKValue");
+            const paramLValue = document.getElementById("paramLValue");
+            const paramMValue = document.getElementById("paramMValue");
+
+            const maxTokens = document.getElementById("maxTokens");
+            const maxIterations = document.getElementById("maxIterations");
+
+            const optDebug = document.getElementById("optDebug");
+            const optUniqueIDs = document.getElementById("optUniqueIDs");
+
+            const inputStats = document.getElementById("inputStats");
+            const outputStats = document.getElementById("outputStats");
+            const compressionRatio =
+                document.getElementById("compressionRatio");
+            const tokenEstimate = document.getElementById("tokenEstimate");
+
+            const adaptiveResults = document.getElementById("adaptiveResults");
+            const foundParams = document.getElementById("foundParams");
+            const errorRow = document.getElementById("errorRow");
+            const errorMessage = document.getElementById("errorMessage");
+
+            // Sample HTML
+            const sampleHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sample Page</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+        </nav>
+    </header>
+    <main>
+        <article>
+            <h1>Welcome to Our Website</h1>
+            <p>This is a sample paragraph with some text content. It demonstrates how the Ellipsis library compresses HTML by merging containers, summarizing text using the TextRank algorithm, and filtering attributes based on semantic importance.</p>
+            <p>The compression is particularly useful for preparing web content to be processed by Large Language Models (LLMs), where token limits are a concern.</p>
+            <div class="features">
+                <section>
+                    <h2>Feature One</h2>
+                    <p>Description of the first feature. This text will be summarized based on the l parameter value.</p>
+                </section>
+                <section>
+                    <h2>Feature Two</h2>
+                    <p>Description of the second feature. More text here that might be compressed or removed.</p>
+                </section>
+            </div>
+            <form action="/submit" method="post">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </article>
+    </main>
+    <footer>
+        <p>&copy; 2026 Sample Company. All rights reserved.</p>
+    </footer>
+</body>
+</html>`;
+
+            // Initialize with sample
+            inputEl.value = sampleHTML;
+            updateInputStats();
+
+            // Event Listeners
+            methodRadios.forEach((radio) => {
+                radio.addEventListener("change", (e) => {
+                    const isAdaptive = e.target.value === "adaptive";
+                    nonAdaptiveParams.classList.toggle("d-none", isAdaptive);
+                    adaptiveParams.classList.toggle("d-none", !isAdaptive);
+                });
+            });
+
+            paramK.addEventListener(
+                "input",
+                () => (paramKValue.textContent = paramK.value)
+            );
+            paramL.addEventListener(
+                "input",
+                () => (paramLValue.textContent = paramL.value)
+            );
+            paramM.addEventListener(
+                "input",
+                () => (paramMValue.textContent = paramM.value)
+            );
+
+            inputEl.addEventListener("input", updateInputStats);
+
+            compressBtn.addEventListener("click", compress);
+
+            function updateInputStats() {
+                const len = inputEl.value.length;
+                inputStats.textContent = `${len.toLocaleString()} chars`;
+            }
+
+            function updateOutputStats(snapshot, isAdaptive = false) {
+                const inputLen = inputEl.value.length;
+                const outputLen = snapshot.serializedHtml.length;
+                const reduction = ((1 - snapshot.meta.sizeRatio) * 100).toFixed(
+                    1
+                );
+
+                outputStats.textContent = `${outputLen.toLocaleString()} chars`;
+                compressionRatio.textContent = `${reduction}% reduction`;
+                tokenEstimate.textContent = `~${snapshot.meta.estimatedTokens.toLocaleString()} tokens`;
+
+                if (isAdaptive && snapshot.parameters) {
+                    adaptiveResults.classList.remove("d-none");
+                    foundParams.textContent = `k=${snapshot.parameters.k.toFixed(
+                        4
+                    )}, l=${snapshot.parameters.l.toFixed(
+                        4
+                    )}, m=${snapshot.parameters.m.toFixed(4)} (${
+                        snapshot.parameters.adaptiveIterations
+                    } iterations)`;
+                } else {
+                    adaptiveResults.classList.add("d-none");
+                }
+            }
+
+            function showError(message) {
+                errorRow.classList.remove("d-none");
+                errorMessage.textContent = message;
+            }
+
+            function hideError() {
+                errorRow.classList.add("d-none");
+            }
+
+            async function compress() {
+                hideError();
+
+                const html = inputEl.value.trim();
+                if (!html) {
+                    showError("Please enter some HTML to compress.");
+                    return;
+                }
+
+                // Show loading state
+                compressBtn.disabled = true;
+                spinner.classList.remove("d-none");
+                outputEl.parentElement.classList.add("loading");
+
+                try {
+                    // Parse HTML into DOM
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, "text/html");
+
+                    const options = {
+                        debug: optDebug.checked,
+                        assignUniqueIDs: optUniqueIDs.checked,
+                    };
+
+                    const isAdaptive =
+                        document.querySelector('input[name="method"]:checked')
+                            .value === "adaptive";
+                    let snapshot;
+
+                    if (isAdaptive) {
+                        snapshot = await Ellipsis.adaptiveEllipsis(
+                            doc.body,
+                            parseInt(maxTokens.value),
+                            parseInt(maxIterations.value),
+                            options
+                        );
+                    } else {
+                        snapshot = await Ellipsis.ellipsis(
+                            doc.body,
+                            parseFloat(paramK.value),
+                            parseFloat(paramL.value),
+                            parseFloat(paramM.value),
+                            options
+                        );
+                    }
+
+                    outputEl.value = snapshot.serializedHtml;
+                    updateOutputStats(snapshot, isAdaptive);
+                } catch (err) {
+                    console.error(err);
+                    showError(`Error: ${err.message}`);
+                } finally {
+                    // Hide loading state
+                    compressBtn.disabled = false;
+                    spinner.classList.add("d-none");
+                    outputEl.parentElement.classList.remove("loading");
+                }
+            }
+
+            // Compress on load with sample
+            compress();
+        </script>
+    </body>
+</html>
