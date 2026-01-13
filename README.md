@@ -2,18 +2,18 @@
 
 A TypeScript library for DOM to Snapshot conversion - compress HTML documents for efficient processing by LLMs.
 
-Based on the [D2Snap research paper](https://arxiv.org/abs/2508.04412).
+Based on the [Beyond Pixels: Exploring DOM Downsampling for LLM-Based Web Agents](https://arxiv.org/abs/2508.04412).
 
 ## Installation
 
 ```bash
-npm install ellipsis
+npm install @rajnandan1/ellipsis
 ```
 
 ## Quick Start
 
 ```typescript
-import { ellipsis, adaptiveEllipsis } from "ellipsis";
+import { ellipsis, adaptiveEllipsis } from "@rajnandan1/ellipsis";
 
 // Method 1: Manual control with k, l, m parameters
 const snapshot = await ellipsis(document.body, 0.1, 0.3, 0.5);
@@ -87,7 +87,7 @@ Based on research findings, these configurations achieve optimal performance:
 Manual compression with explicit control over parameters.
 
 ```typescript
-import { ellipsis } from "ellipsis";
+import { ellipsis } from "@rajnandan1/ellipsis";
 
 const snapshot = await ellipsis(
     document.body, // DOM element to compress
@@ -110,7 +110,7 @@ console.log(snapshot.meta);
 Automatic compression that finds optimal parameters to fit within a token budget.
 
 ```typescript
-import { adaptiveEllipsis } from "ellipsis";
+import { adaptiveEllipsis } from "@rajnandan1/ellipsis";
 
 const snapshot = await adaptiveEllipsis(
     document.body,
@@ -172,7 +172,12 @@ type AdaptiveSnapshot = Snapshot & {
 ### Types Export
 
 ```typescript
-import type { DOM, EllipsisOptions, Snapshot, TextRankOptions } from "ellipsis";
+import type {
+    DOM,
+    EllipsisOptions,
+    Snapshot,
+    TextRankOptions,
+} from "@rajnandan1/ellipsis";
 ```
 
 ## Preserving Elements
@@ -180,7 +185,7 @@ import type { DOM, EllipsisOptions, Snapshot, TextRankOptions } from "ellipsis";
 To prevent specific elements from being compressed, add the preserve attribute:
 
 ```html
-<div data-preserve>
+<div data-preserve="this is important">
     <span class="price">$99.99</span>
     <strong>Important text</strong>
     <!-- All nested content is preserved as-is -->
@@ -224,7 +229,7 @@ Opens a browser-based tool to experiment with different parameters and see compr
 
 ## References
 
--   [D2Snap: Downsampling the DOM for Web Agent Automation](https://arxiv.org/abs/2508.04412)
+-   [Beyond Pixels: Exploring DOM Downsampling for LLM-Based Web Agents](https://arxiv.org/abs/2508.04412)
 
 ## License
 

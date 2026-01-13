@@ -1,5 +1,5 @@
 {
-    "name": "ellipsis",
+    "name": "@rajnandan1/ellipsis",
     "version": "1.0.0",
     "description": "Compress and convert DOM snapshots to Markdown using TextRank algorithm.",
     "type": "module",
