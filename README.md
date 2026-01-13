@@ -1,7 +1,5 @@
 # Ellipsis
 
-<video src="video.mp4" controls></video>
-
 A TypeScript library for DOM to Snapshot conversion - compress HTML documents for efficient processing by LLMs.
 
 Based on the [Beyond Pixels: Exploring DOM Downsampling for LLM-Based Web Agents](https://arxiv.org/abs/2508.04412).
