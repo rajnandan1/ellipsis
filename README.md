@@ -217,7 +217,7 @@ Opens a browser-based tool to experiment with different parameters and see compr
 ## Browser Usage (IIFE)
 
 ```html
-<script src="https://unpkg.com/ellipsis/dist/index.global.js"></script>
+<script src="https://unpkg.com/@rajnandan1/ellipsis@latest/dist/index.global.js"></script>
 <script>
     const { ellipsis, adaptiveEllipsis } = Ellipsis;
 
