@@ -1,6 +1,6 @@
 # Ellipsis
 
-<video src="https://github.com/user-attachments/assets/cdfe026b-db3c-47d7-875f-a0aa3a1933a4" autoplay loop muted playsinline></video>
+<video src="https://github.com/user-attachments/assets/cdfe026b-db3c-47d7-875f-a0aa3a1933a4" autoplay loop muted playsinline width="100%"></video>
 
 A TypeScript library for DOM to Snapshot conversion - compress HTML documents for efficient processing by LLMs.
 
